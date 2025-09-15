@@ -1,0 +1,21 @@
+specVersion: 0.35.0
+name: send-notification-to-slack
+runtime: python
+registry: docker.io/mneagul
+image: send-notification-to-slack:latest
+invoke: cloudevent
+build:
+  builder: pack
+  buildpacks: []
+  buildEnvs: []
+run:
+  envs: []
+  volumes: []
+deploy:
+  namespace: ""
+  annotations: {}
+  options: {}
+  labels: {}
+  healthEndpoints:
+    liveness: /health
+    readiness: /ready
