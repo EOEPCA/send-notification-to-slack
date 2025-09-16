@@ -1,15 +1,16 @@
 # EOEPCA2Slack Helm Chart
 
-A Helm chart for deploying the EOEPCA Slack notification function to Kubernetes.
+A Helm chart for deploying the EOEPCA Slack notification function as a Knative Service.
 
 ## Description
 
-This chart deploys a single deployment of the EOEPCA Slack notification function, which receives CloudEvents and forwards them to Slack channels. The application is designed to run as a Knative function but can also be deployed as a standard Kubernetes deployment.
+This chart deploys a Knative Service for the EOEPCA Slack notification function, which receives CloudEvents and forwards them to Slack channels. The application runs as a serverless function with automatic scaling capabilities provided by Knative Serving.
 
 ## Prerequisites
 
 - Kubernetes 1.19+
 - Helm 3.2.0+
+- Knative Serving installed on the cluster
 
 ## Installation
 
@@ -106,7 +107,6 @@ slack:
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `replicaCount` | Number of replicas | `1` |
 | `image.repository` | Container image repository | `ghcr.io/eoepca/send-notification-to-slack` |
 | `image.tag` | Container image tag | `latest` |
 | `image.pullPolicy` | Image pull policy | `IfNotPresent` |
@@ -120,9 +120,11 @@ slack:
 | `resources.requests.memory` | Memory request | `128Mi` |
 | `resources.limits.cpu` | CPU limit | `500m` |
 | `resources.limits.memory` | Memory limit | `512Mi` |
-| `autoscaling.enabled` | Enable horizontal pod autoscaler | `false` |
-| `autoscaling.minReplicas` | Minimum number of replicas | `1` |
-| `autoscaling.maxReplicas` | Maximum number of replicas | `10` |
+| `knative.visibility` | Service visibility (cluster-local or empty) | `"cluster-local"` |
+| `knative.annotations` | Service-level annotations | `{}` |
+| `knative.revisionAnnotations` | Revision-level annotations | `{}` |
+| `knative.containerConcurrency` | Requests per container | `0` |
+| `knative.timeoutSeconds` | Request timeout | `300` |
 
 ## Usage Examples
 
@@ -147,15 +149,6 @@ helm install eoepca2slack ./helm/eoepca2slack \
   --set slack.secretRef.name=slack-config
 ```
 
-### Installation with Autoscaling
-
-```bash
-helm install eoepca2slack ./helm/eoepca2slack \
-  --set autoscaling.enabled=true \
-  --set autoscaling.minReplicas=1 \
-  --set autoscaling.maxReplicas=4 \
-  --set slack.webhookUrl="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
-```
 
 ## Upgrading
 

@@ -1,6 +1,4 @@
 # Default values for eoepca2slack
-replicaCount: 1
-
 image:
   repository: ghcr.io/eoepca/send-notification-to-slack
   pullPolicy: IfNotPresent
@@ -55,9 +53,23 @@ podSecurityContext: {}
 # Container security context
 securityContext: {}
 
-# Autoscaling configuration
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
+# Knative configuration
+knative:
+  # Service visibility: "cluster-local" for internal only, "" for external
+  visibility: "cluster-local"
+  
+  # Service-level annotations
+  annotations: {}
+    # autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+  
+  # Revision-level annotations
+  revisionAnnotations: {}
+    # autoscaling.knative.dev/minScale: "1"
+    # autoscaling.knative.dev/maxScale: "10"
+    # autoscaling.knative.dev/target: "100"
+  
+  # Container concurrency (requests per container)
+  containerConcurrency: 0
+  
+  # Request timeout in seconds
+  timeoutSeconds: 300

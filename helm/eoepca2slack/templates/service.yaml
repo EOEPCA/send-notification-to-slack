@@ -1,25 +1,35 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: serving.knative.dev/v1
+kind: Service
 metadata:
   name: {{ include "eoepca2slack.fullname" . }}
   labels:
     {{- include "eoepca2slack.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.knative.visibility }}
+    serving.knative.dev/visibility: {{ .Values.knative.visibility }}
+    {{- end }}
+    {{- with .Values.knative.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
-  {{- end }}
-  selector:
-    matchLabels:
-      {{- include "eoepca2slack.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.knative.revisionAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "eoepca2slack.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.knative.containerConcurrency }}
+      containerConcurrency: {{ .Values.knative.containerConcurrency }}
+      {{- end }}
+      {{- if .Values.knative.timeoutSeconds }}
+      timeoutSeconds: {{ .Values.knative.timeoutSeconds }}
+      {{- end }}
       {{- with .Values.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
@@ -33,7 +43,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
+            - name: http1
               containerPort: 8080
               protocol: TCP
           env:
