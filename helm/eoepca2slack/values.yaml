@@ -1,0 +1,85 @@
+# Default values for eoepca2slack
+image:
+  repository: ghcr.io/eoepca/send-notification-to-slack
+  pullPolicy: IfNotPresent
+  tag: "pr-1"
+
+nameOverride: ""
+fullnameOverride: ""
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Slack configuration
+slack:
+  # Direct configuration (values will be set as environment variables)
+  webhookUrl: ""
+  channel: ""
+  username: "EOEPCA Bot"
+  iconEmoji: ":satellite:"
+  
+  # Secret reference configuration (alternative to direct config)
+  # If specified, these will override the direct configuration above
+  secretRef:
+    enabled: false
+    name: "eoepca-slack-secret"
+    webhookUrlKey: "webhook-url"
+    channelKey: "channel"
+    usernameKey: "username"
+    iconEmojiKey: "icon-emoji"
+
+# Additional environment variables
+env: []
+  # - name: LOG_LEVEL
+  #   value: "INFO"
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: {}
+
+# Container security context
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+# Knative configuration
+knative:
+  # Service visibility: "cluster-local" for internal only, "" for external
+  visibility: "cluster-local"
+  
+  # Autoscaling configuration
+  minScale: 1
+  maxScale: 10
+  
+  # Service-level annotations
+  annotations: {}
+    # autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+  
+  # Revision-level annotations
+  revisionAnnotations: {}
+    # autoscaling.knative.dev/target: "100"
+  
+  # Container concurrency (requests per container)
+  containerConcurrency: 0
+  
+  # Request timeout in seconds
+  timeoutSeconds: 300

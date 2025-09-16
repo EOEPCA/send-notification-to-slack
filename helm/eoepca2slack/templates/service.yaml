@@ -1,0 +1,120 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ include "eoepca2slack.fullname" . }}
+  labels:
+    {{- include "eoepca2slack.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.knative.visibility }}
+    serving.knative.dev/visibility: {{ .Values.knative.visibility }}
+    {{- end }}
+    {{- with .Values.knative.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  template:
+    metadata:
+      annotations:
+        {{- if .Values.knative.minScale }}
+        autoscaling.knative.dev/minScale: {{ .Values.knative.minScale | quote }}
+        {{- end }}
+        {{- if .Values.knative.maxScale }}
+        autoscaling.knative.dev/maxScale: {{ .Values.knative.maxScale | quote }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.knative.revisionAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "eoepca2slack.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.knative.containerConcurrency }}
+      containerConcurrency: {{ .Values.knative.containerConcurrency }}
+      {{- end }}
+      {{- if .Values.knative.timeoutSeconds }}
+      timeoutSeconds: {{ .Values.knative.timeoutSeconds }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http1
+              containerPort: 8080
+              protocol: TCP
+          env:
+            {{- if .Values.slack.secretRef.enabled }}
+            # Slack configuration from secret
+            - name: SLACK_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.slack.secretRef.name }}
+                  key: {{ .Values.slack.secretRef.webhookUrlKey }}
+            {{- if .Values.slack.secretRef.channelKey }}
+            - name: SLACK_CHANNEL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.slack.secretRef.name }}
+                  key: {{ .Values.slack.secretRef.channelKey }}
+            {{- end }}
+            {{- if .Values.slack.secretRef.usernameKey }}
+            - name: SLACK_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.slack.secretRef.name }}
+                  key: {{ .Values.slack.secretRef.usernameKey }}
+            {{- end }}
+            {{- if .Values.slack.secretRef.iconEmojiKey }}
+            - name: SLACK_ICON_EMOJI
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.slack.secretRef.name }}
+                  key: {{ .Values.slack.secretRef.iconEmojiKey }}
+            {{- end }}
+            {{- else }}
+            # Slack configuration from values
+            {{- if .Values.slack.webhookUrl }}
+            - name: SLACK_WEBHOOK_URL
+              value: {{ .Values.slack.webhookUrl | quote }}
+            {{- end }}
+            {{- if .Values.slack.channel }}
+            - name: SLACK_CHANNEL
+              value: {{ .Values.slack.channel | quote }}
+            {{- end }}
+            {{- if .Values.slack.username }}
+            - name: SLACK_USERNAME
+              value: {{ .Values.slack.username | quote }}
+            {{- end }}
+            {{- if .Values.slack.iconEmoji }}
+            - name: SLACK_ICON_EMOJI
+              value: {{ .Values.slack.iconEmoji | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.env }}
+            # Additional environment variables
+            {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
