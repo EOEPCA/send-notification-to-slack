@@ -36,6 +36,9 @@ curl -X POST http://localhost:8080/ \
 # Build and run
 docker build -t send-notification-to-slack .
 docker run -p 8080:8080 send-notification-to-slack
+
+# Or use pre-built image from GHCR
+docker run -p 8080:8080 ghcr.io/mneagul/send-notification-to-slack:latest
 ```
 
 ## Configuration
