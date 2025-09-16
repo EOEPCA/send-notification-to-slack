@@ -2,7 +2,7 @@
 image:
   repository: ghcr.io/eoepca/send-notification-to-slack
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "pr-1"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -51,12 +51,24 @@ podAnnotations: {}
 podSecurityContext: {}
 
 # Container security context
-securityContext: {}
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+      - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 # Knative configuration
 knative:
   # Service visibility: "cluster-local" for internal only, "" for external
   visibility: "cluster-local"
+  
+  # Autoscaling configuration
+  minScale: 1
+  maxScale: 10
   
   # Service-level annotations
   annotations: {}
@@ -64,8 +76,6 @@ knative:
   
   # Revision-level annotations
   revisionAnnotations: {}
-    # autoscaling.knative.dev/minScale: "1"
-    # autoscaling.knative.dev/maxScale: "10"
     # autoscaling.knative.dev/target: "100"
   
   # Container concurrency (requests per container)

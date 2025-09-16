@@ -14,13 +14,19 @@ metadata:
 spec:
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
       annotations:
+        {{- if .Values.knative.minScale }}
+        autoscaling.knative.dev/minScale: {{ .Values.knative.minScale | quote }}
+        {{- end }}
+        {{- if .Values.knative.maxScale }}
+        autoscaling.knative.dev/maxScale: {{ .Values.knative.maxScale | quote }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.knative.revisionAnnotations }}
+        {{- end }}
+        {{- with .Values.knative.revisionAnnotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       labels:
         {{- include "eoepca2slack.selectorLabels" . | nindent 8 }}
     spec:

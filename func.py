@@ -50,6 +50,14 @@ class SlackMessage(BaseModel):
 # Initialize settings
 settings = Settings()
 
+# Log configuration on startup
+logger.info(f"Starting EOEPCA Slack notification function")
+logger.info(f"Slack webhook configured: {'Yes' if settings.slack_webhook_url else 'No'}")
+if settings.slack_channel:
+    logger.info(f"Default destination channel: {settings.slack_channel}")
+else:
+    logger.info("No default destination channel configured")
+
 app = FastAPI(title="Knative CloudEvent Function", version="1.0.0")
 
 async def send_to_slack(cloudevent_data: Dict[str, Any], headers: Dict[str, str]) -> bool:
