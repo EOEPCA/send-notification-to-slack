@@ -1,0 +1,16 @@
+apiVersion: v2
+name: eoepca2slack
+description: A Helm chart for EOEPCA Slack notification function
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - eoepca
+  - slack
+  - notifications
+  - knative
+home: https://github.com/EOEPCA/send-notification-to-slack
+sources:
+  - https://github.com/EOEPCA/send-notification-to-slack
+maintainers:
+  - name: EOEPCA Team

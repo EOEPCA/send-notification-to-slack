@@ -1,0 +1,63 @@
+# Default values for eoepca2slack
+replicaCount: 1
+
+image:
+  repository: ghcr.io/eoepca/send-notification-to-slack
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Slack configuration
+slack:
+  # Direct configuration (values will be set as environment variables)
+  webhookUrl: ""
+  channel: ""
+  username: "EOEPCA Bot"
+  iconEmoji: ":satellite:"
+  
+  # Secret reference configuration (alternative to direct config)
+  # If specified, these will override the direct configuration above
+  secretRef:
+    enabled: false
+    name: "eoepca-slack-secret"
+    webhookUrlKey: "webhook-url"
+    channelKey: "channel"
+    usernameKey: "username"
+    iconEmojiKey: "icon-emoji"
+
+# Additional environment variables
+env: []
+  # - name: LOG_LEVEL
+  #   value: "INFO"
+
+# Pod annotations
+podAnnotations: {}
+
+# Pod security context
+podSecurityContext: {}
+
+# Container security context
+securityContext: {}
+
+# Autoscaling configuration
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
