@@ -1,9 +1,10 @@
 specVersion: 0.35.0
 name: send-notification-to-slack
 runtime: python
-registry: ghcr.io/mneagul
+registry: ghcr.io/eoepca
 image: send-notification-to-slack:latest
 invoke: cloudevent
+created: 2025-01-16T19:00:00Z
 build:
   builder: pack
   buildpacks: []
@@ -15,7 +16,7 @@ deploy:
   namespace: ""
   annotations: {}
   options: {}
-  labels: {}
+  labels: []
   healthEndpoints:
     liveness: /health
     readiness: /ready
