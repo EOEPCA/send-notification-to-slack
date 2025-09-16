@@ -7,6 +7,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: send-notification-to-slack
+  CHART_NAME: eoepca2slack
 
 jobs:
   release-docker:
@@ -48,4 +49,13 @@ jobs:
       - name: Update func.yaml with new image
         run: |
           sed -i "s|image: .*|image: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.VERSION }}|" func.yaml
+      
+      - name: Update Chart.yaml
+        run: |
+          sed -i "s|^version:.*|version: ${{ steps.version.outputs.version }}|" helm/${{ env.CHART_NAME }}/Chart.yaml
+          sed -i "s|^appVersion:.*|appVersion: \"${{ steps.version.outputs.version }}\"|" helm/${{ env.CHART_NAME }}/Chart.yaml
           
+      - name: Lint and package Helm chart
+        run: |
+          helm lint helm/${{ env.CHART_NAME }}
+          helm package helm/${{ env.CHART_NAME }} --destination .
